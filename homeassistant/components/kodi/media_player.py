@@ -91,7 +91,7 @@ DEPRECATED_TURN_OFF_ACTIONS = {
     "shutdown": "System.Shutdown",
 }
 
-WEBSOCKET_WATCHDOG_INTERVAL = timedelta(minutes=3)
+WEBSOCKET_WATCHDOG_INTERVAL = timedelta(seconds=10)
 
 # https://github.com/xbmc/xbmc/blob/master/xbmc/media/MediaType.h
 MEDIA_TYPES = {
@@ -432,7 +432,11 @@ class KodiEntity(MediaPlayerEntity):
             self._reset_state()
             return
 
-        self._players = await self._kodi.get_players()
+        try:
+            self._players = await self._kodi.get_players()
+        except jsonrpc_base.jsonrpc.TransportError:
+            self._reset_state()
+            return
 
         if self._kodi_is_off:
             self._reset_state()
