@@ -4,6 +4,7 @@ from datetime import timedelta
 import logging
 import math
 
+
 import voluptuous as vol
 
 from homeassistant.components.fan import SUPPORT_SET_SPEED, FanEntity

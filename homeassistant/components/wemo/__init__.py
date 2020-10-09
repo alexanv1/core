@@ -3,7 +3,12 @@ from __future__ import annotations
 
 import logging
 
-import pywemo
+#import pywemo
+from .pywemo.ouimeaux_device import Device as WeMoDevice
+from .pywemo import discovery
+from .pywemo import subscribe
+from .pywemo import exceptions
+
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -30,6 +35,7 @@ MAX_CONCURRENCY = 3
 WEMO_MODEL_DISPATCH = {
     "Bridge": LIGHT_DOMAIN,
     "CoffeeMaker": SWITCH_DOMAIN,
+    "Crockpot": SWITCH_DOMAIN,
     "Dimmer": LIGHT_DOMAIN,
     "Humidifier": FAN_DOMAIN,
     "Insight": SWITCH_DOMAIN,
@@ -104,7 +110,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     config = hass.data[DOMAIN].pop("config")
 
     # Keep track of WeMo device subscriptions for push updates
-    registry = hass.data[DOMAIN]["registry"] = pywemo.SubscriptionRegistry()
+    # registry = hass.data[DOMAIN]["registry"] = pywemo.SubscriptionRegistry()
+    registry = hass.data[DOMAIN]["registry"] = subscribe.SubscriptionRegistry()
     await hass.async_add_executor_job(registry.start)
 
     # Respond to discovery requests from WeMo devices.
@@ -145,7 +152,8 @@ class WemoDispatcher:
         self._loaded_components = set()
 
     async def async_add_unique_device(
-        self, hass: HomeAssistant, wemo: pywemo.WeMoDevice
+        # self, hass: HomeAssistant, wemo: pywemo.WeMoDevice
+        self, hass: HomeAssistant, wemo: WeMoDevice
     ) -> None:
         """Add a WeMo device to hass if it has not already been added."""
         if wemo.serialnumber in self._added_serial_numbers:
@@ -205,7 +213,8 @@ class WemoDiscovery:
         _LOGGER.debug("Scanning network for WeMo devices")
         try:
             for device in await self._hass.async_add_executor_job(
-                pywemo.discover_devices
+                #pywemo.discover_devices
+                discovery.discover_devices
             ):
                 await self._wemo_dispatcher.async_add_unique_device(self._hass, device)
             await self.discover_statics()
@@ -250,7 +259,8 @@ class WemoDiscovery:
 
 def validate_static_config(host, port):
     """Handle a static config."""
-    url = pywemo.setup_url_for_address(host, port)
+    #url = pywemo.setup_url_for_address(host, port)
+    url = discovery.setup_url_for_address(host, port)
 
     if not url:
         _LOGGER.error(
@@ -260,10 +270,13 @@ def validate_static_config(host, port):
         return None
 
     try:
-        device = pywemo.discovery.device_from_description(url)
+        #device = pywemo.discovery.device_from_description(url)
+        device = discovery.device_from_description(url)
     except (
-        pywemo.exceptions.ActionException,
-        pywemo.exceptions.HTTPException,
+        #pywemo.exceptions.ActionException,
+        #pywemo.exceptions.HTTPException,
+        exceptions.ActionException,
+        exceptions.HTTPException,
     ) as err:
         _LOGGER.error("Unable to access WeMo at %s (%s)", url, err)
         return None

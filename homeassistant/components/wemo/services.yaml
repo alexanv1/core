@@ -24,3 +24,20 @@ reset_filter_life:
     entity:
       integration: wemo
       domain: fan
+
+crockpot_update_settings:
+  # Description of the service
+  description: Updates crockpot settings
+  target:
+    entity:
+      integration: wemo
+      domain: switch
+  # Different fields that your service accepts
+  fields:
+    # Key of the field
+    mode:
+      description: Cooking mode
+      example: '50'
+    time:
+      description: Cooking time
+      example: '300'
