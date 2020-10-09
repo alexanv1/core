@@ -239,7 +239,8 @@ class Recorder(threading.Thread):
 
         self._timechanges_seen = 0
         self._keepalive_count = 0
-        self._old_state_ids = {}
+        self._old_states = {}
+        self._pending_expunge = []
         self.event_session = None
         self.get_session = None
         self._completed_database_setup = False
@@ -385,7 +386,6 @@ class Recorder(threading.Thread):
                 if event.event_type == EVENT_STATE_CHANGED:
                     dbevent.event_data = "{}"
                 self.event_session.add(dbevent)
-                self.event_session.flush()
             except (TypeError, ValueError):
                 _LOGGER.warning("Event is not JSON serializable: %s", event)
             except Exception as err:  # pylint: disable=broad-except
@@ -396,16 +396,15 @@ class Recorder(threading.Thread):
                 try:
                     dbstate = States.from_event(event)
                     has_new_state = event.data.get("new_state")
-                    dbstate.old_state_id = self._old_state_ids.get(dbstate.entity_id)
+                    if dbstate.entity_id in self._old_states:
+                        dbstate.old_state = self._old_states.pop(dbstate.entity_id)
                     if not has_new_state:
                         dbstate.state = None
-                    dbstate.event_id = dbevent.event_id
+                    dbstate.event = dbevent
                     self.event_session.add(dbstate)
-                    self.event_session.flush()
                     if has_new_state:
-                        self._old_state_ids[dbstate.entity_id] = dbstate.state_id
-                    elif dbstate.entity_id in self._old_state_ids:
-                        del self._old_state_ids[dbstate.entity_id]
+                        self._old_states[dbstate.entity_id] = dbstate
+                        self._pending_expunge.append(dbstate)
                 except (TypeError, ValueError):
                     _LOGGER.warning(
                         "State is not JSON serializable: %s",
@@ -491,6 +490,13 @@ class Recorder(threading.Thread):
 
     def _commit_event_session(self):
         try:
+            self.event_session.flush()
+            for dbstate in self._pending_expunge:
+                # Expunge the state so its not expired
+                # until we use it later for dbstate.old_state
+                if dbstate in self.event_session:
+                    self.event_session.expunge(dbstate)
+            self._pending_expunge = []
             self.event_session.commit()
         except Exception as err:
             _LOGGER.error("Error executing query: %s", err)

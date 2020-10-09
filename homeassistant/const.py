@@ -1,13 +1,13 @@
 """Constants used by Home Assistant components."""
 MAJOR_VERSION = 0
 MINOR_VERSION = 116
-PATCH_VERSION = "0.dev0"
+PATCH_VERSION = "1"
 __short_version__ = f"{MAJOR_VERSION}.{MINOR_VERSION}"
 __version__ = f"{__short_version__}.{PATCH_VERSION}"
 REQUIRED_PYTHON_VER = (3, 7, 1)
 # Truthy date string triggers showing related deprecation warning messages.
 REQUIRED_NEXT_PYTHON_VER = (3, 8, 0)
-REQUIRED_NEXT_PYTHON_DATE = ""
+REQUIRED_NEXT_PYTHON_DATE = "December 7, 2020"
 
 # Format for platform files
 PLATFORM_FORMAT = "{platform}.{domain}"
@@ -389,7 +389,7 @@ CURRENCY_CENT = "¢"
 # Temperature units
 TEMP_CELSIUS = f"{DEGREE}C"
 TEMP_FAHRENHEIT = f"{DEGREE}F"
-TEMP_KELVIN = f"{DEGREE}K"
+TEMP_KELVIN = "K"
 
 # Time units
 TIME_MICROSECONDS = "μs"
@@ -448,6 +448,9 @@ MASS_POUNDS: str = "lb"
 
 # Conductivity units
 CONDUCTIVITY: str = f"µS/{LENGTH_CENTIMETERS}"
+
+# Light units
+LIGHT_LUX: str = "lx"
 
 # UV Index units
 UV_INDEX: str = "UV index"
@@ -617,3 +620,10 @@ PRECISION_TENTHS = 0.1
 # Static list of entities that will never be exposed to
 # cloud, alexa, or google_home components
 CLOUD_NEVER_EXPOSED_ENTITIES = ["group.all_locks"]
+
+# The ID of the Home Assistant Cast App
+CAST_APP_ID_HOMEASSISTANT = "B12CE3CA"
+
+# The tracker error allow when converting
+# loop time to human readable time
+MAX_TIME_TRACKING_ERROR = 0.001

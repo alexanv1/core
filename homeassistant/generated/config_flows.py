@@ -68,6 +68,7 @@ FLOWS = [
     "geonetnz_volcano",
     "gios",
     "glances",
+    "goalzero",
     "gogogate2",
     "gpslogger",
     "griddy",
@@ -127,6 +128,7 @@ FLOWS = [
     "nut",
     "nws",
     "nzbget",
+    "omnilogic",
     "onvif",
     "opentherm_gw",
     "openuv",
@@ -215,6 +217,5 @@ FLOWS = [
     "yeelight",
     "zerproc",
     "zha",
-    "zoneminder",
     "zwave"
 ]
