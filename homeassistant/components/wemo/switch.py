@@ -4,14 +4,19 @@ from datetime import datetime, timedelta
 import logging
 
 import async_timeout
-from pywemo.ouimeaux_device.api.service import ActionException
+#from pywemo.ouimeaux_device.api.service import ActionException
+from .pywemo.ouimeaux_device.api.service import ActionException
 
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.const import STATE_OFF, STATE_ON, STATE_STANDBY, STATE_UNKNOWN
+from homeassistant.const import ATTR_ENTITY_ID
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.util import convert
 
-from .const import DOMAIN as WEMO_DOMAIN
+from .const import (
+    DOMAIN as WEMO_DOMAIN,
+    SERVICE_UPDATE_CROCKPOT_SETTINGS,
+)
 
 SCAN_INTERVAL = timedelta(seconds=10)
 PARALLEL_UPDATES = 0
@@ -24,6 +29,10 @@ ATTR_SWITCH_MODE = "switch_mode"
 ATTR_CURRENT_STATE_DETAIL = "state_detail"
 ATTR_COFFEMAKER_MODE = "coffeemaker_mode"
 
+ATTR_CROCKPOT_MODE = 'crockpot_mode'
+ATTR_CROCKPOT_REMAINING_TIME = 'crockpot_remaining_time'
+ATTR_CROCKPOT_COOKED_TIME = 'crockpot_cooked_time'
+
 MAKER_SWITCH_MOMENTARY = "momentary"
 MAKER_SWITCH_TOGGLE = "toggle"
 
@@ -33,11 +42,17 @@ WEMO_STANDBY = 8
 
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
-    """Set up WeMo switches."""
+    """Set up WeMo switches and CrockPots."""
+    crockpots = []
 
     async def _discovered_wemo(device):
         """Handle a discovered Wemo device."""
-        async_add_entities([WemoSwitch(device)])
+        if device.model_name == 'Crockpot':
+            entity = CrockPot(device)
+            crockpots.append(entity)
+            async_add_entities([entity])
+        else:
+            async_add_entities([WemoSwitch(device)])
 
     async_dispatcher_connect(hass, f"{WEMO_DOMAIN}.switch", _discovered_wemo)
 
@@ -46,6 +61,22 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             _discovered_wemo(device)
             for device in hass.data[WEMO_DOMAIN]["pending"].pop("switch")
         ]
+    )
+
+    def handle_crockpot_update_settings(service):
+
+        entity_ids = service.data.get(ATTR_ENTITY_ID)
+        crockpots_service = [entity for entity in crockpots if entity.entity_id in entity_ids]
+
+        mode = service.data.get('mode', 0)
+        time = service.data.get('time', 0)
+
+        for crockpot in crockpots_service:
+            crockpot.update_settings(mode, time)
+
+    # Register service(s)
+    hass.services.async_register(
+        WEMO_DOMAIN, SERVICE_UPDATE_CROCKPOT_SETTINGS, handle_crockpot_update_settings
     )
 
 
@@ -261,6 +292,129 @@ class WemoSwitch(SwitchEntity):
             if not self._available:
                 _LOGGER.info("Reconnected to %s", self.name)
                 self._available = True
+        except (AttributeError, ActionException) as err:
+            _LOGGER.warning("Could not update status for %s (%s)", self.name, err)
+            self._available = False
+            self.wemo.reconnect_with_device()
+
+class CrockPot(WemoSwitch):
+    """Representation of a WeMo CrockPot."""
+
+    def __init__(self, device):
+        """Initialize the WeMo switch."""
+        WemoSwitch.__init__(self, device)
+        self.crockpot_mode = None
+        self.crockpot_remaining_time = None
+        self.crockpot_cooked_time = None
+
+        # The crockpot may sometimes disconnect briefly and reconnect
+        # Ignore this for brief periods to avoid the switch reporting as off intermittently
+        self._ignoreUnavailableCounter = 0
+
+        # After a reconnect, the crockpot may indicate that its state is turned off during the first couple of updates
+        # We want to ignore these so ignore the first 2 updates that switch the mode to 0
+        self._ignoreUpdatesCounter = 0
+
+    @property
+    def device_state_attributes(self):
+        """Return the state attributes of the device."""
+        attr = {}
+
+        if self.crockpot_mode is not None:
+            attr[ATTR_CROCKPOT_MODE] = self.crockpot_mode
+            attr[ATTR_CURRENT_STATE_DETAIL] = self.detail_state
+        if self.crockpot_remaining_time is not None:
+            attr[ATTR_CROCKPOT_REMAINING_TIME] = self.crockpot_remaining_time
+        if self.crockpot_cooked_time is not None:
+            attr[ATTR_CROCKPOT_COOKED_TIME] = self.crockpot_cooked_time
+
+        return attr
+
+    @property
+    def detail_state(self):
+        """Return the state of the device."""
+        if self.crockpot_mode is not None:
+            return self._mode_string
+
+    @property
+    def available(self):
+        """Return true if switch is available."""
+        if not self._available:
+            if self._ignoreUnavailableCounter < 3:
+                _LOGGER.warning('Switch not available but ignoring for now. _ignoreUnavailableCounter=' + str(self._ignoreUnavailableCounter))
+                self._ignoreUnavailableCounter = self._ignoreUnavailableCounter + 1
+                return True
+
+        return self._available
+
+    @property
+    def icon(self):
+        """Return the icon of device based on its type."""
+        if self._model_name == 'Crockpot':
+            return 'mdi:stove'
+        return None
+
+    @property
+    def is_on(self):
+        """Return true if switch is on. Standby is on."""
+        return self.crockpot_mode is not None and int(self.crockpot_mode) > 0
+
+    def turn_on(self, **kwargs):
+        """Turn the switch on."""
+        self.update_settings("52", "360")       # "High" for 6 hours
+
+    def turn_off(self, **kwargs):
+        """Turn the switch off."""
+        WemoSwitch.turn_off(self)
+        # Make sure the state updates aren't ignored since the update was triggered by HASS
+        self._ignoreUpdatesCounter = 2
+
+    def update_settings(self, mode, time):
+        """Update CrockPot settings."""
+    
+        try:
+            self.wemo.update_settings(mode, time)
+
+            if int(mode) == 0:
+                # Make sure the state updates aren't ignored since the update was triggered by HASS
+                self._ignoreUpdatesCounter = 2
+            else:
+                # Ignore state updates where state=Off since slow cooker sometimes reports wrong values when turning on
+                self._ignoreUpdatesCounter = 0
+        except ActionException as err:
+            _LOGGER.warning("Error while updating settings for %s (%s)", self.name, err)
+            self._available = False
+
+        self._update(True)
+        self.schedule_update_ha_state()
+
+    def _update(self, force_update):
+        """Update the device state."""
+        try:
+            state = self.wemo.get_state(force_update)
+            updateState = True
+
+            if (self.crockpot_mode is None or self.crockpot_mode != "0") and self.wemo.mode == "0":
+                if self._ignoreUpdatesCounter != 2:
+                    updateState = False
+                    self._ignoreUpdatesCounter = self._ignoreUpdatesCounter + 1
+                    _LOGGER.warning('Ignoring state update. _ignoreUpdatesCounter=' + str(self._ignoreUpdatesCounter))
+                else:
+                    self._ignoreUpdatesCounter = 0
+            else:
+                self._ignoreUpdatesCounter = 0
+
+            if updateState:
+                self._state = state
+                self._mode_string = self.wemo.mode_string
+                self.crockpot_mode = self.wemo.mode
+                self.crockpot_remaining_time = self.wemo.remaining_time
+                self.crockpot_cooked_time = self.wemo.cooked_time
+
+            if not self._available:
+                _LOGGER.warning('Reconnected to %s', self.name)
+                self._available = True
+                self._ignoreUnavailableCounter = 0
         except (AttributeError, ActionException) as err:
             _LOGGER.warning("Could not update status for %s (%s)", self.name, err)
             self._available = False

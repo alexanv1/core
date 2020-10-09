@@ -2,7 +2,11 @@
 import asyncio
 import logging
 
-import pywemo
+#import pywemo
+from .pywemo import ouimeaux_device
+from .pywemo import discovery
+from .pywemo import subscribe
+
 import requests
 import voluptuous as vol
 
@@ -17,6 +21,7 @@ from .const import DOMAIN
 WEMO_MODEL_DISPATCH = {
     "Bridge": "light",
     "CoffeeMaker": "switch",
+    'Crockpot': 'switch',
     "Dimmer": "light",
     "Humidifier": "fan",
     "Insight": "switch",
@@ -91,7 +96,8 @@ async def async_setup_entry(hass, entry):
     config = hass.data[DOMAIN].pop("config")
 
     # Keep track of WeMo device subscriptions for push updates
-    registry = hass.data[DOMAIN]["registry"] = pywemo.SubscriptionRegistry()
+    # registry = hass.data[DOMAIN]["registry"] = pywemo.SubscriptionRegistry()
+    registry = hass.data[DOMAIN]["registry"] = subscribe.SubscriptionRegistry()
     await hass.async_add_executor_job(registry.start)
 
     def stop_wemo(event):
@@ -174,7 +180,8 @@ def validate_static_config(host, port):
         return None
 
     try:
-        device = pywemo.discovery.device_from_description(url, None)
+        #device = pywemo.discovery.device_from_description(url, None)
+        device = discovery.device_from_description(url, None)
     except (
         requests.exceptions.ConnectionError,
         requests.exceptions.Timeout,
@@ -188,7 +195,8 @@ def validate_static_config(host, port):
 def setup_url_for_address(host, port):
     """Determine setup.xml url for given host and port pair."""
     if not port:
-        port = pywemo.ouimeaux_device.probe_wemo(host)
+        #port = pywemo.ouimeaux_device.probe_wemo(host)
+        port = ouimeaux_device.probe_wemo(host)
 
     if not port:
         return None

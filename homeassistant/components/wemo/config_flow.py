@@ -1,6 +1,7 @@
 """Config flow for Wemo."""
 
-import pywemo
+#import pywemo
+from .pywemo import discovery
 
 from homeassistant import config_entries
 from homeassistant.helpers import config_entry_flow
@@ -10,7 +11,8 @@ from . import DOMAIN
 
 async def _async_has_devices(hass):
     """Return if there are devices that can be discovered."""
-    return bool(await hass.async_add_executor_job(pywemo.discover_devices))
+    #return bool(await hass.async_add_executor_job(pywemo.discover_devices))
+    return bool(await hass.async_add_executor_job(discovery.discover_devices))
 
 
 config_entry_flow.register_discovery_flow(
