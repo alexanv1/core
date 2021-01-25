@@ -248,10 +248,7 @@ class CrockPot(WemoSwitch):
 
     @property
     def icon(self):
-        """Return the icon of device based on its type."""
-        if self._model_name == 'Crockpot':
-            return 'mdi:stove'
-        return None
+        return 'mdi:stove'
 
     @property
     def is_on(self):
