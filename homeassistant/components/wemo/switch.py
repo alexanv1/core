@@ -9,7 +9,6 @@ from homeassistant.const import ATTR_ENTITY_ID
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.util import convert
 
-
 from .const import (
     DOMAIN as WEMO_DOMAIN,
     SERVICE_UPDATE_CROCKPOT_SETTINGS,
