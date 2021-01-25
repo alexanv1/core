@@ -282,6 +282,7 @@ class KodiEntity(MediaPlayerEntity):
         self._app_properties = {}
         self._media_position_updated_at = None
         self._media_position = None
+        self._watchdog_in_progress = False
 
     def _reset_state(self, players=None):
         self._players = players
@@ -320,6 +321,7 @@ class KodiEntity(MediaPlayerEntity):
         if self._kodi_is_off:
             return
 
+        _LOGGER.debug(f"{self._unique_id}: async_on_stop() received, resetting state with empty player array")
         self._reset_state([])
         self.async_write_ha_state()
 
@@ -332,12 +334,15 @@ class KodiEntity(MediaPlayerEntity):
 
     async def async_on_quit(self, sender, data):
         """Reset the player state on quit action."""
+        _LOGGER.debug(f"{self._unique_id}: async_on_quit() received, clearing connection")
         await self._clear_connection()
 
     async def _clear_connection(self, close=True):
+        _LOGGER.debug(f"{self._unique_id}: _clear_connection() called, resetting state")
         self._reset_state()
         self.async_write_ha_state()
         if close:
+            _LOGGER.debug(f"{self._unique_id}: _clear_connection(): closing underlying connection")
             await self._connection.close()
 
     @property
@@ -396,6 +401,8 @@ class KodiEntity(MediaPlayerEntity):
 
     async def _on_ws_connected(self):
         """Call after ws is connected."""
+        _LOGGER.debug(f"{self._unique_id}: Websocket connected.")
+
         self._register_ws_callbacks()
 
         version = (await self._kodi.get_application_properties(["version"]))["version"]
@@ -412,22 +419,33 @@ class KodiEntity(MediaPlayerEntity):
             await self._connection.connect()
             await self._on_ws_connected()
         except (jsonrpc_base.jsonrpc.TransportError, CannotConnectError):
-            _LOGGER.debug("Unable to connect to Kodi via websocket", exc_info=True)
+            _LOGGER.debug(f"{self._unique_id}: Unable to connect to Kodi via websocket", exc_info=True)
             await self._clear_connection(False)
 
     async def _ping(self):
         try:
             await self._kodi.ping()
+            _LOGGER.debug(f"{self._unique_id}: Successfully pinged Kodi via websocket")
         except (jsonrpc_base.jsonrpc.TransportError, CannotConnectError):
-            _LOGGER.debug("Unable to ping Kodi via websocket", exc_info=True)
+            _LOGGER.debug(f"{self._unique_id}: Unable to ping Kodi via websocket", exc_info=True)
             await self._clear_connection()
 
     async def _async_connect_websocket_if_disconnected(self, *_):
         """Reconnect the websocket if it fails."""
-        if not self._connection.connected:
-            await self._async_ws_connect()
-        else:
-            await self._ping()
+        
+        if self._watchdog_in_progress:
+            _LOGGER.debug(f"{self._unique_id}: Watchdog: Previous connect\ping attempt is still in progress, exiting.")
+            return
+        try:
+            self._watchdog_in_progress = True
+            if not self._connection.connected:
+                _LOGGER.debug(f"{self._unique_id}: Watchdog: Trying to connect to Kodi via websocket")
+                await self._async_ws_connect()
+            else:
+                _LOGGER.debug(f"{self._unique_id}: Watchdog: Trying to ping Kodi via websocket")
+                await self._ping()
+        finally:
+            self._watchdog_in_progress = False
 
     @callback
     def _register_ws_callbacks(self):
@@ -449,14 +467,30 @@ class KodiEntity(MediaPlayerEntity):
     @cmd
     async def async_update(self):
         """Retrieve latest state."""
+
+        _LOGGER.debug(f"{self._unique_id}: async_update() called")
+
         if not self._connection.connected:
+            _LOGGER.debug(f"{self._unique_id}: no connection, resetting state")
             self._reset_state()
             return
 
-        self._players = await self._kodi.get_players()
+        try:
+            self._players = await self._kodi.get_players()
+        except jsonrpc_base.jsonrpc.TransportError:
+            _LOGGER.debug(f"{self._unique_id}: TransportError from _kodi.get_players(), resetting state", exc_info=True)
+            self._reset_state()
+            if self._connection.connected:
+                _LOGGER.debug(f"{self._unique_id}: Closing websocket connection.")
+                await self._connection.close()
+            return
 
         if self._kodi_is_off:
+            _LOGGER.debug(f"{self._unique_id}: Kodi is off, resetting state")
             self._reset_state()
+            if self._connection.connected:
+                _LOGGER.debug(f"{self._unique_id}: Closing websocket connection.")
+                await self._connection.close()
             return
 
         if self._players:
@@ -489,6 +523,7 @@ class KodiEntity(MediaPlayerEntity):
                 ],
             )
         else:
+            _LOGGER.debug(f"{self._unique_id}: no active players, resetting state with empty player array")
             self._reset_state([])
 
     @property
@@ -621,12 +656,12 @@ class KodiEntity(MediaPlayerEntity):
 
     async def async_turn_on(self):
         """Turn the media player on."""
-        _LOGGER.debug("Firing event to turn on device")
+        _LOGGER.debug(f"{self._unique_id}: Firing event to turn on device")
         self.hass.bus.async_fire(EVENT_TURN_ON, {ATTR_ENTITY_ID: self.entity_id})
 
     async def async_turn_off(self):
         """Turn the media player off."""
-        _LOGGER.debug("Firing event to turn off device")
+        _LOGGER.debug(f"{self._unique_id}: Firing event to turn off device")
         self.hass.bus.async_fire(EVENT_TURN_OFF, {ATTR_ENTITY_ID: self.entity_id})
 
     @cmd
@@ -719,12 +754,12 @@ class KodiEntity(MediaPlayerEntity):
     async def async_set_shuffle(self, shuffle):
         """Set shuffle mode, for the first player."""
         if self._no_active_players:
-            raise RuntimeError("Error: No active player.")
+            raise RuntimeError(f"{self._unique_id}: Error: No active player.")
         await self._kodi.set_shuffle(shuffle)
 
     async def async_call_method(self, method, **kwargs):
         """Run Kodi JSONRPC API method with params."""
-        _LOGGER.debug("Run API method %s, kwargs=%s", method, kwargs)
+        _LOGGER.debug(f"{self._unique_id}: Run API method %s, kwargs=%s", method, kwargs)
         result_ok = False
         try:
             result = await self._kodi.call_method(method, **kwargs)
@@ -732,7 +767,7 @@ class KodiEntity(MediaPlayerEntity):
         except jsonrpc_base.jsonrpc.ProtocolError as exc:
             result = exc.args[2]["error"]
             _LOGGER.error(
-                "Run API method %s.%s(%s) error: %s",
+                f"{self._unique_id}: Run API method %s.%s(%s) error: %s",
                 self.entity_id,
                 method,
                 kwargs,
@@ -741,7 +776,7 @@ class KodiEntity(MediaPlayerEntity):
         except jsonrpc_base.jsonrpc.TransportError:
             result = None
             _LOGGER.warning(
-                "TransportError trying to run API method %s.%s(%s)",
+                f"{self._unique_id}: TransportError trying to run API method %s.%s(%s)",
                 self.entity_id,
                 method,
                 kwargs,
@@ -754,7 +789,7 @@ class KodiEntity(MediaPlayerEntity):
                 "result_ok": result_ok,
                 "input": {"method": method, "params": kwargs},
             }
-            _LOGGER.debug("EVENT kodi_call_method_result: %s", event_data)
+            _LOGGER.debug(f"{self._unique_id}: EVENT kodi_call_method_result: %s", event_data)
             self.hass.bus.async_fire(
                 EVENT_KODI_CALL_METHOD_RESULT, event_data=event_data
             )
@@ -801,10 +836,10 @@ class KodiEntity(MediaPlayerEntity):
                 await self._kodi.add_album_to_playlist(int(media_id))
 
         else:
-            raise RuntimeError("Unrecognized media type.")
+            raise RuntimeError(f"{self._unique_id}: Unrecognized media type.")
 
         if media_id is None:
-            _LOGGER.warning("No media detected for Playlist.Add")
+            _LOGGER.warning(f"{self._unique_id}: No media detected for Playlist.Add")
 
     async def _async_add_all_albums(self, artist_name):
         """Add all albums of an artist to default playlist (i.e. playlistid=0).
@@ -825,7 +860,7 @@ class KodiEntity(MediaPlayerEntity):
             out = self._find(artist_name, [a["artist"] for a in artists["artists"]])
             return artists["artists"][out[0][0]]["artistid"]
         except KeyError:
-            _LOGGER.warning("No artists were found: %s", artist_name)
+            _LOGGER.warning(f"{self._unique_id}: No artists were found: %s", artist_name)
             return None
 
     async def _async_find_song(self, song_name, artist_name=""):
@@ -853,7 +888,7 @@ class KodiEntity(MediaPlayerEntity):
             return albums["albums"][out[0][0]]["albumid"]
         except KeyError:
             _LOGGER.warning(
-                "No albums were found with artist: %s, album: %s",
+                f"{self._unique_id}: No albums were found with artist: %s, album: %s",
                 artist_name,
                 album_name,
             )
@@ -902,7 +937,7 @@ class KodiEntity(MediaPlayerEntity):
         response = await build_item_response(self._kodi, payload, _get_thumbnail_url)
         if response is None:
             raise BrowseError(
-                f"Media not found: {media_content_type} / {media_content_id}"
+                f"{self._unique_id}: Media not found: {media_content_type} / {media_content_id}"
             )
         return response
 
