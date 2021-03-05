@@ -1,6 +1,7 @@
 {
   "domain": "kodi",
   "name": "Kodi",
+  "version": "1.0.0",
   "documentation": "https://www.home-assistant.io/integrations/kodi",
   "requirements": ["pykodi==0.2.5"],
   "codeowners": ["@OnFreund", "@cgtobi"],
