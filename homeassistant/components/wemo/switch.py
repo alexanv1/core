@@ -215,6 +215,10 @@ class CrockPot(WemoSwitch):
         self._ignoreUpdatesCounter = 0
 
     @property
+    def should_poll(self) -> bool:
+        return True
+
+    @property
     def extra_state_attributes(self):
         """Return the state attributes of the device."""
         attr = {}
@@ -265,6 +269,9 @@ class CrockPot(WemoSwitch):
         # Make sure the state updates aren't ignored since the update was triggered by HASS
         self._ignoreUpdatesCounter = 2
 
+        self._update(True)
+        self.schedule_update_ha_state()
+
     def update_settings(self, mode, time):
         """Update CrockPot settings."""
     
@@ -311,7 +318,6 @@ class CrockPot(WemoSwitch):
                 _LOGGER.warning('Reconnected to %s', self.name)
                 self._available = True
                 self._ignoreUnavailableCounter = 0
-        except (AttributeError, ActionException) as err:
+        except ActionException as err:
             _LOGGER.warning("Could not update status for %s (%s)", self.name, err)
             self._available = False
-            self.wemo.reconnect_with_device()
