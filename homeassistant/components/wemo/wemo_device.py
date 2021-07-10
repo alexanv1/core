@@ -36,6 +36,11 @@ class DeviceWrapper:
         self.device_info = _device_info(wemo)
         self.supports_long_press = wemo.supports_long_press()
 
+    @property
+    def model_name(self):
+        """Return the model name."""
+        return self.wemo.model_name
+
     def subscription_callback(
         self, _device: WeMoDevice, event_type: str, params: str
     ) -> None:
