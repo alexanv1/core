@@ -1,8 +1,12 @@
 """Home Assistant wrapper for a pyWeMo device."""
 import logging
 
-from pywemo import PyWeMoException, WeMoDevice
-from pywemo.subscribe import EVENT_TYPE_LONG_PRESS
+#from pywemo import PyWeMoException, WeMoDevice
+#from pywemo.subscribe import EVENT_TYPE_LONG_PRESS
+
+from .pywemo.ouimeaux_device import Device as WeMoDevice
+from .pywemo.exceptions import PyWeMoException
+from .pywemo.subscribe import EVENT_TYPE_LONG_PRESS
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (

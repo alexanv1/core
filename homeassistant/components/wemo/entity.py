@@ -7,8 +7,11 @@ import contextlib
 import logging
 
 import async_timeout
-from pywemo import WeMoDevice
-from pywemo.exceptions import ActionException
+#from pywemo import WeMoDevice
+#from pywemo.exceptions import ActionException
+
+from .pywemo.exceptions import ActionException
+from .pywemo.ouimeaux_device import Device as WeMoDevice
 
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity import DeviceInfo, Entity
