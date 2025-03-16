@@ -1,5 +1,6 @@
 {
   "domain": "vesync",
+  "version": "1.0.0",
   "name": "VeSync",
   "categories": [
     "climate.air_purifiers_humidifiers",

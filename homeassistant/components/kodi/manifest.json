@@ -1,6 +1,7 @@
 {
   "domain": "kodi",
   "name": "Kodi",
+  "version": "1.0.0",
   "after_dependencies": ["media_source"],
   "categories": ["media_entertainment.tv_streaming"],
   "codeowners": ["@OnFreund"],

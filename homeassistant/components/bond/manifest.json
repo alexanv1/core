@@ -6,6 +6,7 @@
     "buttons_remotes",
     "blinds_curtains"
   ],
+  "version": "1.0.0",
   "codeowners": ["@bdraco", "@prystupa", "@joshs85", "@marciogranzotto"],
   "config_flow": true,
   "connectivity": ["infrared", "network", "rf"],

@@ -83,11 +83,12 @@ SWITCHES: dict[DeviceCategory, tuple[TuyaSwitchEntityDescription, ...]] = {
     DeviceCategory.BH: (
         TuyaSwitchEntityDescription(
             key=DPCode.START,
-            translation_key="start",
+            name="Start",
+            icon="mdi:kettle-steam",
         ),
         TuyaSwitchEntityDescription(
             key=DPCode.WARM,
-            translation_key="heat_preservation",
+            name="Keep Warm",
             entity_category=EntityCategory.CONFIG,
         ),
     ),
@@ -549,6 +550,26 @@ SWITCHES: dict[DeviceCategory, tuple[TuyaSwitchEntityDescription, ...]] = {
             entity_category=EntityCategory.CONFIG,
         ),
     ),
+    DeviceCategory.KQZG: (
+        TuyaSwitchEntityDescription(
+            key=DPCode.SWITCH,
+            name="Power",
+            icon="mdi:microwave",
+            entity_category=EntityCategory.CONFIG,
+        ),
+        TuyaSwitchEntityDescription(
+            key=DPCode.START,
+            name="Start",
+            icon="mdi:microwave",
+            entity_category=EntityCategory.CONFIG,
+        ),
+        TuyaSwitchEntityDescription(
+            key=DPCode.PAUSE,
+            name="Pause",
+            icon="mdi:microwave-off",
+            entity_category=EntityCategory.CONFIG,
+        ),
+    ),
     DeviceCategory.KT: (
         TuyaSwitchEntityDescription(
             key=DPCode.ANION,
@@ -598,12 +619,14 @@ SWITCHES: dict[DeviceCategory, tuple[TuyaSwitchEntityDescription, ...]] = {
     DeviceCategory.MZJ: (
         TuyaSwitchEntityDescription(
             key=DPCode.SWITCH,
-            translation_key="switch",
+            name="Switch",
+            icon="mdi:power",
             entity_category=EntityCategory.CONFIG,
         ),
         TuyaSwitchEntityDescription(
             key=DPCode.START,
-            translation_key="start",
+            name="Start",
+            icon="mdi:pot-steam",
             entity_category=EntityCategory.CONFIG,
         ),
     ),

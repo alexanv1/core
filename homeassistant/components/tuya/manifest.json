@@ -3,6 +3,7 @@
   "name": "Tuya",
   "categories": ["hubs_protocols.smart_home_hubs"],
   "codeowners": ["@Tuya", "@zlinoliver"],
+  "version": "1.0.0",
   "config_flow": true,
   "connectivity": ["cloud"],
   "dependencies": ["ffmpeg"],

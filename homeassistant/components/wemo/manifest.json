@@ -3,6 +3,7 @@
   "name": "Belkin WeMo",
   "categories": ["plugs_switches", "lighting.bulbs_lamps"],
   "codeowners": ["@esev"],
+  "version": "1.0.0",
   "config_flow": true,
   "connectivity": ["network"],
   "documentation": "https://www.home-assistant.io/integrations/wemo",

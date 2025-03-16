@@ -37,32 +37,32 @@ _LOGGER = logging.getLogger(__name__)
 SENSOR_TYPES = {
     "type": SensorEntityDescription(
         key="type",
-        translation_key="link_type",
+        name="link_type",
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
     ),
     "link_rate": SensorEntityDescription(
         key="link_rate",
-        translation_key="link_rate",
+        name="link_rate",
         native_unit_of_measurement="Mbps",
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
     ),
     "signal": SensorEntityDescription(
         key="signal",
-        translation_key="signal_strength",
+        name="signal_strength",
         native_unit_of_measurement=PERCENTAGE,
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
     ),
     "ssid": SensorEntityDescription(
         key="ssid",
-        translation_key="ssid",
+        name="ssid",
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     "conn_ap_mac": SensorEntityDescription(
         key="conn_ap_mac",
-        translation_key="access_point_mac",
+        name="access_point_mac",
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
     ),
@@ -80,35 +80,35 @@ class NetgearSensorEntityDescription(SensorEntityDescription):
 SENSOR_TRAFFIC_TYPES = [
     NetgearSensorEntityDescription(
         key="NewTodayUpload",
-        translation_key="upload_today",
+        name="upload_today",
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfInformation.MEGABYTES,
         device_class=SensorDeviceClass.DATA_SIZE,
     ),
     NetgearSensorEntityDescription(
         key="NewTodayDownload",
-        translation_key="download_today",
+        name="download_today",
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfInformation.MEGABYTES,
         device_class=SensorDeviceClass.DATA_SIZE,
     ),
     NetgearSensorEntityDescription(
         key="NewYesterdayUpload",
-        translation_key="upload_yesterday",
+        name="upload_yesterday",
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfInformation.MEGABYTES,
         device_class=SensorDeviceClass.DATA_SIZE,
     ),
     NetgearSensorEntityDescription(
         key="NewYesterdayDownload",
-        translation_key="download_yesterday",
+        name="download_yesterday",
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfInformation.MEGABYTES,
         device_class=SensorDeviceClass.DATA_SIZE,
     ),
     NetgearSensorEntityDescription(
         key="NewWeekUpload",
-        translation_key="upload_week",
+        name="upload_week",
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfInformation.MEGABYTES,
         device_class=SensorDeviceClass.DATA_SIZE,
@@ -117,7 +117,7 @@ SENSOR_TRAFFIC_TYPES = [
     ),
     NetgearSensorEntityDescription(
         key="NewWeekUpload",
-        translation_key="upload_week_average",
+        name="upload_week_average",
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfInformation.MEGABYTES,
         device_class=SensorDeviceClass.DATA_SIZE,
@@ -126,7 +126,7 @@ SENSOR_TRAFFIC_TYPES = [
     ),
     NetgearSensorEntityDescription(
         key="NewWeekDownload",
-        translation_key="download_week",
+        name="download_week",
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfInformation.MEGABYTES,
         device_class=SensorDeviceClass.DATA_SIZE,
@@ -135,7 +135,7 @@ SENSOR_TRAFFIC_TYPES = [
     ),
     NetgearSensorEntityDescription(
         key="NewWeekDownload",
-        translation_key="download_week_average",
+        name="download_week_average",
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfInformation.MEGABYTES,
         device_class=SensorDeviceClass.DATA_SIZE,
@@ -144,7 +144,7 @@ SENSOR_TRAFFIC_TYPES = [
     ),
     NetgearSensorEntityDescription(
         key="NewMonthUpload",
-        translation_key="upload_month",
+        name="upload_month",
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfInformation.MEGABYTES,
         device_class=SensorDeviceClass.DATA_SIZE,
@@ -153,7 +153,7 @@ SENSOR_TRAFFIC_TYPES = [
     ),
     NetgearSensorEntityDescription(
         key="NewMonthUpload",
-        translation_key="upload_month_average",
+        name="upload_month_average",
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfInformation.MEGABYTES,
         device_class=SensorDeviceClass.DATA_SIZE,
@@ -162,7 +162,7 @@ SENSOR_TRAFFIC_TYPES = [
     ),
     NetgearSensorEntityDescription(
         key="NewMonthDownload",
-        translation_key="download_month",
+        name="download_month",
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfInformation.MEGABYTES,
         device_class=SensorDeviceClass.DATA_SIZE,
@@ -171,7 +171,7 @@ SENSOR_TRAFFIC_TYPES = [
     ),
     NetgearSensorEntityDescription(
         key="NewMonthDownload",
-        translation_key="download_month_average",
+        name="download_month_average",
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfInformation.MEGABYTES,
         device_class=SensorDeviceClass.DATA_SIZE,
@@ -180,7 +180,7 @@ SENSOR_TRAFFIC_TYPES = [
     ),
     NetgearSensorEntityDescription(
         key="NewLastMonthUpload",
-        translation_key="upload_last_month",
+        name="upload_last_month",
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfInformation.MEGABYTES,
         device_class=SensorDeviceClass.DATA_SIZE,
@@ -189,7 +189,7 @@ SENSOR_TRAFFIC_TYPES = [
     ),
     NetgearSensorEntityDescription(
         key="NewLastMonthUpload",
-        translation_key="upload_last_month_average",
+        name="upload_last_month_average",
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfInformation.MEGABYTES,
         device_class=SensorDeviceClass.DATA_SIZE,
@@ -198,7 +198,7 @@ SENSOR_TRAFFIC_TYPES = [
     ),
     NetgearSensorEntityDescription(
         key="NewLastMonthDownload",
-        translation_key="download_last_month",
+        name="download_last_month",
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfInformation.MEGABYTES,
         device_class=SensorDeviceClass.DATA_SIZE,
@@ -207,7 +207,7 @@ SENSOR_TRAFFIC_TYPES = [
     ),
     NetgearSensorEntityDescription(
         key="NewLastMonthDownload",
-        translation_key="download_last_month_average",
+        name="download_last_month_average",
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfInformation.MEGABYTES,
         device_class=SensorDeviceClass.DATA_SIZE,
@@ -219,21 +219,21 @@ SENSOR_TRAFFIC_TYPES = [
 SENSOR_SPEED_TYPES = [
     NetgearSensorEntityDescription(
         key="NewOOKLAUplinkBandwidth",
-        translation_key="uplink_bandwidth",
+        name="uplink_bandwidth",
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfDataRate.MEGABITS_PER_SECOND,
         device_class=SensorDeviceClass.DATA_RATE,
     ),
     NetgearSensorEntityDescription(
         key="NewOOKLADownlinkBandwidth",
-        translation_key="downlink_bandwidth",
+        name="downlink_bandwidth",
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfDataRate.MEGABITS_PER_SECOND,
         device_class=SensorDeviceClass.DATA_RATE,
     ),
     NetgearSensorEntityDescription(
         key="AveragePing",
-        translation_key="average_ping",
+        name="average_ping",
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfTime.MILLISECONDS,
     ),
@@ -242,14 +242,14 @@ SENSOR_SPEED_TYPES = [
 SENSOR_UTILIZATION = [
     NetgearSensorEntityDescription(
         key="NewCPUUtilization",
-        translation_key="cpu_utilization",
+        name="cpu_utilization",
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     NetgearSensorEntityDescription(
         key="NewMemoryUtilization",
-        translation_key="memory_utilization",
+        name="memory_utilization",
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
@@ -259,7 +259,7 @@ SENSOR_UTILIZATION = [
 SENSOR_LINK_TYPES = [
     NetgearSensorEntityDescription(
         key="NewEthernetLinkStatus",
-        translation_key="ethernet_link_status",
+        name="ethernet_link_status",
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
 ]
