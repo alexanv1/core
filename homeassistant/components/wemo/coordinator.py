@@ -7,7 +7,7 @@ from functools import partial
 import logging
 from typing import Literal, override
 
-from pywemo import Insight, LongPressMixin, WeMoDevice
+from pywemo import CrockPot, Insight, LongPressMixin, WeMoDevice
 from pywemo.exceptions import ActionException, PyWeMoException
 from pywemo.subscribe import EVENT_TYPE_LONG_PRESS, SubscriptionRegistry
 
@@ -233,6 +233,11 @@ class DeviceCoordinator(DataUpdateCoordinator[None]):
             # The WeMo Insight device does not send subscription updates for the
             # insight_params values when the device is off. Polling is required in
             # this case so the Sensor entities are properly populated.
+            return True
+        
+        if isinstance(self.wemo, CrockPot):
+            # The WeMo CrockPot device doesn't always send updates for cooked and remaining time.
+            # Always poll it
             return True
 
         return not (

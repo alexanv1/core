@@ -25,7 +25,7 @@ async def async_setup_entry(
     async_add_entities(
         BondSwitch(data, device)
         for device in data.hub.devices
-        if DeviceType.is_generic(device.type)
+        if DeviceType.is_generic(device.type) or (DeviceType.is_fireplace(device.type) and not device.supports_set_brightness())
     )
 
 

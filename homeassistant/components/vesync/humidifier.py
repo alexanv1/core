@@ -167,10 +167,13 @@ class VeSyncHumidifierHA(VeSyncBaseEntity[VeSyncHumidifier], HumidifierEntity):
     @override
     async def async_set_humidity(self, humidity: int) -> None:
         """Set the target humidity of the device."""
+
         if not await self.device.set_humidity(humidity):
             if self.device.last_response:
                 raise HomeAssistantError(self.device.last_response.message)
             raise HomeAssistantError("Failed to set humidity.")
+        
+        self.async_write_ha_state()
 
     @override
     async def async_set_mode(self, mode: str) -> None:

@@ -140,7 +140,8 @@ SELECTS: dict[DeviceCategory, tuple[TuyaSelectEntityDescription, ...]] = {
         TuyaSelectEntityDescription(
             key=DPCode.MOODLIGHTING,
             entity_category=EntityCategory.CONFIG,
-            translation_key="humidifier_moodlighting",
+            icon="mdi:lightbulb-multiple",
+            name="Moodlighting",
         ),
         TuyaSelectEntityDescription(
             key=DPCode.COUNTDOWN,

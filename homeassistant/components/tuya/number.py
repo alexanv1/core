@@ -15,7 +15,7 @@ from homeassistant.components.number import (
     NumberEntity,
     NumberEntityDescription,
 )
-from homeassistant.const import EntityCategory, UnitOfRatio, UnitOfTime
+from homeassistant.const import EntityCategory, UnitOfRatio, UnitOfTemperature, UnitOfTime
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
@@ -185,6 +185,36 @@ NUMBERS: dict[DeviceCategory, tuple[TuyaNumberEntityDescription, ...]] = {
             entity_category=EntityCategory.CONFIG,
         ),
     ),
+    DeviceCategory.KQZG: (
+        TuyaNumberEntityDescription(
+            key=DPCode.COOK_TEMPERATURE,
+            name="Cook Temperature",
+            icon="mdi:thermometer",
+            native_min_value=100,
+            device_class=NumberDeviceClass.TEMPERATURE,
+            native_unit_of_measurement=UnitOfTemperature.FAHRENHEIT,
+            entity_category=EntityCategory.CONFIG,
+        ),
+        TuyaNumberEntityDescription(
+            key=DPCode.COOK_TIME,
+            name="Cook Time",
+            icon="mdi:timer",
+            native_unit_of_measurement=UnitOfTime.MINUTES,
+            entity_category=EntityCategory.CONFIG,
+        ),
+        TuyaNumberEntityDescription(
+            key=DPCode.APPOINTMENT_TIME,
+            name="Cook Delay Time",
+            icon="mdi:timer-cog",
+            native_unit_of_measurement=UnitOfTime.MINUTES,
+            entity_category=EntityCategory.CONFIG,
+        ),
+        TuyaNumberEntityDescription(
+            key=DPCode.CLOUD_RECIPE_NUMBER,
+            name="Cloud Recipe",
+            entity_category=EntityCategory.CONFIG,
+        ),
+    ),
     DeviceCategory.MAL: (
         TuyaNumberEntityDescription(
             key=DPCode.DELAY_SET,
@@ -218,18 +248,22 @@ NUMBERS: dict[DeviceCategory, tuple[TuyaNumberEntityDescription, ...]] = {
     DeviceCategory.MZJ: (
         TuyaNumberEntityDescription(
             key=DPCode.COOK_TEMPERATURE,
-            translation_key="cook_temperature",
+            name="Cook Temperature",
+            icon="mdi:thermometer",
+            device_class=NumberDeviceClass.TEMPERATURE,
+            native_unit_of_measurement=UnitOfTemperature.CELSIUS,
             entity_category=EntityCategory.CONFIG,
         ),
         TuyaNumberEntityDescription(
             key=DPCode.COOK_TIME,
-            translation_key="cook_time",
+            name="Cook Time",
+            icon="mdi:timer",
             native_unit_of_measurement=UnitOfTime.MINUTES,
             entity_category=EntityCategory.CONFIG,
         ),
         TuyaNumberEntityDescription(
             key=DPCode.CLOUD_RECIPE_NUMBER,
-            translation_key="cloud_recipe",
+            name="Cloud Recipe",
             entity_category=EntityCategory.CONFIG,
         ),
     ),
@@ -522,9 +556,12 @@ class TuyaNumberEntity(TuyaEntity, NumberEntity):
         super().__init__(device, device_manager, description)
         self._dpcode_wrapper = definition.number_wrapper
 
-        self._attr_native_max_value = definition.number_wrapper.max_value
-        self._attr_native_min_value = definition.number_wrapper.min_value
-        self._attr_native_step = definition.number_wrapper.value_step
+        if description.native_max_value is None:
+            self._attr_native_max_value = definition.number_wrapper.max_value
+        if description.native_min_value is None:
+            self._attr_native_min_value = definition.number_wrapper.min_value
+        if description.native_step is None:
+            self._attr_native_step = definition.number_wrapper.value_step
 
         self._validate_device_class_unit(definition.number_wrapper.native_unit)
 

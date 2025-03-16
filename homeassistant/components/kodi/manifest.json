@@ -1,6 +1,7 @@
 {
   "domain": "kodi",
   "name": "Kodi",
+  "version": "1.0.0",
   "after_dependencies": ["media_source"],
   "codeowners": ["@OnFreund"],
   "config_flow": true,

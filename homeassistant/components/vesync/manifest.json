@@ -1,5 +1,6 @@
 {
   "domain": "vesync",
+  "version": "1.0.0",
   "name": "VeSync",
   "codeowners": [
     "@markperdue",

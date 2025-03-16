@@ -187,7 +187,7 @@ LIGHTS: dict[DeviceCategory, tuple[TuyaLightEntityDescription, ...]] = {
     DeviceCategory.JSQ: (
         TuyaLightEntityDescription(
             key=DPCode.SWITCH_LED,
-            name=None,
+            name="Ring Light",
             color_mode=DPCode.WORK_MODE,
             brightness=DPCode.BRIGHT_VALUE,
             color_data=DPCode.COLOUR_DATA_HSV,
@@ -249,7 +249,7 @@ LIGHTS: dict[DeviceCategory, tuple[TuyaLightEntityDescription, ...]] = {
     DeviceCategory.QN: (
         TuyaLightEntityDescription(
             key=DPCode.LIGHT,
-            translation_key="backlight",
+            name="Backlight",
             entity_category=EntityCategory.CONFIG,
         ),
     ),
