@@ -1,6 +1,7 @@
 {
   "domain": "bond",
   "name": "Bond",
+  "version": "1.0.0",
   "codeowners": ["@bdraco", "@prystupa", "@joshs85", "@marciogranzotto"],
   "config_flow": true,
   "dhcp": [

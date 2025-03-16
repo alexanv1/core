@@ -18,3 +18,14 @@ reset_filter_life:
     entity:
       integration: wemo
       domain: fan
+
+set_crockpot_cook_time:
+  description: Sets CrockPot cook time
+  target:
+    entity:
+      integration: wemo
+      domain: switch
+  fields:
+    time:
+      description: Cooking time
+      example: 300

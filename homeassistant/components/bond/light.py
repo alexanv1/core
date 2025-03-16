@@ -52,7 +52,7 @@ async def async_setup_entry(
     fireplaces: list[Entity] = [
         BondFireplace(data, device)
         for device in hub.devices
-        if DeviceType.is_fireplace(device.type)
+        if DeviceType.is_fireplace(device.type) and device.supports_set_brightness()
     ]
 
     fp_lights: list[Entity] = [

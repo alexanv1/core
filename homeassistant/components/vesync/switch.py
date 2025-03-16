@@ -19,6 +19,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
+from homeassistant.helpers.entity import EntityCategory
 
 from .common import is_humidifier, is_outlet, is_wall_switch, rgetattr
 from .const import VS_DEVICES, VS_DISCOVERY
@@ -102,6 +103,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[VeSyncSwitchEntityDescription, ...]] = (
         translation_key="display",
         on_fn=lambda device: _toggle_display(device, True),
         off_fn=lambda device: _toggle_display(device, False),
+        entity_category=EntityCategory.CONFIG,
     ),
     VeSyncSwitchEntityDescription(
         key="child_lock",
@@ -110,6 +112,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[VeSyncSwitchEntityDescription, ...]] = (
         translation_key="child_lock",
         on_fn=lambda device: _toggle_child_lock(device, True),
         off_fn=lambda device: _toggle_child_lock(device, False),
+        entity_category=EntityCategory.CONFIG,
     ),
     VeSyncSwitchEntityDescription(
         key="auto_off_config",
@@ -120,6 +123,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[VeSyncSwitchEntityDescription, ...]] = (
         translation_key="auto_off_config",
         on_fn=lambda device: _toggle_auto_stop(device, True),
         off_fn=lambda device: _toggle_auto_stop(device, False),
+        entity_category=EntityCategory.CONFIG,
     ),
     VeSyncSwitchEntityDescription(
         key="drying_mode_power_off",

@@ -599,6 +599,7 @@ class DPCode(StrEnum):
     ANGLE_HORIZONTAL = "angle_horizontal"
     ANGLE_VERTICAL = "angle_vertical"
     ANION = "anion"  # Ionizer unit
+    APPOINTMENT_TIME = "appointment_time"
     ARM_DOWN_PERCENT = "arm_down_percent"
     ARM_UP_PERCENT = "arm_up_percent"
     ATMOSPHERIC_PRESSTURE = "atmospheric_pressture"  # Typo is in Tuya API
@@ -664,6 +665,7 @@ class DPCode(StrEnum):
     COOK_TEMPERATURE = "cook_temperature"
     COOK_TEMPERATURE_2 = "cook_temperature_2"
     COOK_TIME = "cook_time"
+    COOKING_HISTORY = "cooking_history"
     COUNTDOWN = "countdown"  # Countdown
     COUNTDOWN_1 = "countdown_1"
     COUNTDOWN_2 = "countdown_2"

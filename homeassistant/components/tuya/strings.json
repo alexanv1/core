@@ -175,6 +175,9 @@
       }
     },
     "number": {
+      "cook_delay_time": {
+        "name": "Cook Delay time"
+      },
       "alarm_delay": {
         "name": "Alarm delay"
       },
@@ -822,6 +825,12 @@
       "luminosity": {
         "name": "Luminosity"
       },
+      "cooking_history": {
+        "name": "Cooking History"
+      },
+      "fault": {
+        "name": "Fault"
+      },
       "methane": {
         "name": "[%key:component::tuya::entity::binary_sensor::methane::name%]"
       },
@@ -1008,7 +1017,9 @@
         "name": "Anion"
       },
       "arm_beep": {
-        "name": "Arm beep"
+        "name": "Arm beep",
+      "pause": {
+        "name": "Pause"
       },
       "auto_clean": {
         "name": "Auto clean"

@@ -154,6 +154,7 @@ class KodiEntity(MediaPlayerEntity):
         self._media_position_updated_at = None
         self._media_position = None
         self._connect_error = False
+        self._watchdog_in_progress = False
 
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, uid)},
@@ -198,6 +199,7 @@ class KodiEntity(MediaPlayerEntity):
         if self._kodi_is_off:
             return
 
+        _LOGGER.debug("async_on_stop() received, resetting state with empty player array")
         self._reset_state([])
         self.async_write_ha_state()
 
@@ -224,12 +226,15 @@ class KodiEntity(MediaPlayerEntity):
 
     async def async_on_quit(self, sender, data):
         """Reset the player state on quit action."""
+        _LOGGER.debug("async_on_quit() received, clearing connection")
         await self._clear_connection()
 
     async def _clear_connection(self, close=True):
+        _LOGGER.debug("_clear_connection() called, resetting state")
         self._reset_state()
         self.async_write_ha_state()
         if close:
+            _LOGGER.debug("_clear_connection(): closing underlying connection")
             await self._connection.close()
 
     @property
@@ -277,6 +282,8 @@ class KodiEntity(MediaPlayerEntity):
     async def _on_ws_connected(self):
         """Call after ws is connected."""
         self._connect_error = False
+        _LOGGER.debug("Websocket connected.")
+
         self._register_ws_callbacks()
 
         version = (await self._kodi.get_application_properties(["version"]))["version"]
@@ -305,6 +312,7 @@ class KodiEntity(MediaPlayerEntity):
     async def _ping(self):
         try:
             await self._kodi.ping()
+            _LOGGER.debug("Successfully pinged Kodi via websocket")
         except TransportError, CannotConnectError:
             if not self._connect_error:
                 self._connect_error = True
@@ -315,10 +323,20 @@ class KodiEntity(MediaPlayerEntity):
 
     async def _async_connect_websocket_if_disconnected(self, *_):
         """Reconnect the websocket if it fails."""
-        if not self._connection.connected:
-            await self._async_ws_connect()
-        else:
-            await self._ping()
+
+        if self._watchdog_in_progress:
+            _LOGGER.debug("Watchdog: Previous connect or ping attempt is still in progress, exiting.")
+            return
+        try:
+            self._watchdog_in_progress = True
+            if not self._connection.connected:
+                _LOGGER.debug("Watchdog: Trying to connect to Kodi via websocket")
+                await self._async_ws_connect()
+            else:
+                _LOGGER.debug("Watchdog: Trying to ping Kodi via websocket")
+                await self._ping()
+        finally:
+            self._watchdog_in_progress = False
 
     @callback
     def _register_ws_callbacks(self):
@@ -341,20 +359,30 @@ class KodiEntity(MediaPlayerEntity):
     @cmd
     async def async_update(self) -> None:
         """Retrieve latest state."""
+
+        _LOGGER.debug("async_update() called")
+
         if not self._connection.connected:
+            _LOGGER.debug("no connection, resetting state")
             self._reset_state()
             return
 
         try:
             self._players = await self._kodi.get_players()
-        except TransportError, ProtocolError:
-            if not self._connection.can_subscribe:
-                self._reset_state()
-                return
-            raise
+        except TransportError:
+            _LOGGER.debug("TransportError from _kodi.get_players(), resetting state", exc_info=True)
+            self._reset_state()
+            if self._connection.connected:
+                _LOGGER.debug("Closing websocket connection.")
+                await self._connection.close()
+            return
 
         if self._kodi_is_off:
+            _LOGGER.debug("Kodi is off, resetting state")
             self._reset_state()
+            if self._connection.connected:
+                _LOGGER.debug("Closing websocket connection.")
+                await self._connection.close()
             return
 
         if self._players:
@@ -388,6 +416,7 @@ class KodiEntity(MediaPlayerEntity):
                 ],
             )
         else:
+            _LOGGER.debug("no active players, resetting state with empty player array")
             self._reset_state([])
 
     @property

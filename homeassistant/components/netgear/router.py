@@ -73,7 +73,7 @@ class NetgearRouter:
         self.hardware_version = ""
         self.serial_number = ""
 
-        self.track_devices = True
+        self.track_devices = False
         self.method_version = 1
         consider_home_int = entry.options.get(
             CONF_CONSIDER_HOME, DEFAULT_CONSIDER_HOME.total_seconds()
@@ -111,7 +111,7 @@ class NetgearRouter:
             for entry in self.hass.config_entries.async_entries(DOMAIN)
             if entry.disabled_by is None
         ]
-        self.track_devices = self.mode == MODE_ROUTER or len(enabled_entries) == 1
+        # self.track_devices = self.mode == MODE_ROUTER or len(enabled_entries) == 1
         _LOGGER.debug(
             "Netgear track_devices = '%s', device mode '%s'",
             self.track_devices,

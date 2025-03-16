@@ -29,11 +29,12 @@ SWITCHES: dict[DeviceCategory, tuple[SwitchEntityDescription, ...]] = {
     DeviceCategory.BH: (
         SwitchEntityDescription(
             key=DPCode.START,
-            translation_key="start",
+            name="Start",
+            icon="mdi:kettle-steam",
         ),
         SwitchEntityDescription(
             key=DPCode.WARM,
-            translation_key="heat_preservation",
+            name="Keep Warm",
             entity_category=EntityCategory.CONFIG,
         ),
     ),
@@ -362,8 +363,7 @@ SWITCHES: dict[DeviceCategory, tuple[SwitchEntityDescription, ...]] = {
         ),
         SwitchEntityDescription(
             key=DPCode.SWITCH_1,
-            translation_key="indexed_switch",
-            translation_placeholders={"index": "1"},
+            name=None,
             device_class=SwitchDeviceClass.OUTLET,
         ),
         SwitchEntityDescription(
@@ -475,7 +475,27 @@ SWITCHES: dict[DeviceCategory, tuple[SwitchEntityDescription, ...]] = {
             entity_category=EntityCategory.CONFIG,
         ),
     ),
-    DeviceCategory.KT: (
+    DeviceCategory.KQZG: (
+        SwitchEntityDescription(
+            key=DPCode.SWITCH,
+            name="Power",
+            icon="mdi:microwave",
+            entity_category=EntityCategory.CONFIG,
+        ),
+        SwitchEntityDescription(
+            key=DPCode.START,
+            name="Start",
+            icon="mdi:microwave",
+            entity_category=EntityCategory.CONFIG,
+        ),
+        SwitchEntityDescription(
+            key=DPCode.PAUSE,
+            name="Pause",
+            icon="mdi:microwave-off",
+            entity_category=EntityCategory.CONFIG,
+        ),
+    ),
+    DeviceCategory.KT: (    
         SwitchEntityDescription(
             key=DPCode.ANION,
             translation_key="ionizer",
@@ -517,12 +537,14 @@ SWITCHES: dict[DeviceCategory, tuple[SwitchEntityDescription, ...]] = {
     DeviceCategory.MZJ: (
         SwitchEntityDescription(
             key=DPCode.SWITCH,
-            translation_key="switch",
+            name="Switch",
+            icon="mdi:power",
             entity_category=EntityCategory.CONFIG,
         ),
         SwitchEntityDescription(
             key=DPCode.START,
-            translation_key="start",
+            name="Start",
+            icon="mdi:pot-steam",
             entity_category=EntityCategory.CONFIG,
         ),
     ),

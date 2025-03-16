@@ -2,6 +2,7 @@
   "domain": "tuya",
   "name": "Tuya",
   "codeowners": ["@Tuya", "@zlinoliver"],
+  "version": "1.0.0",
   "config_flow": true,
   "dependencies": ["ffmpeg"],
   "dhcp": [

@@ -4,6 +4,8 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import cast, override
 
+from pywemo import CrockPot
+
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
@@ -63,11 +65,16 @@ async def async_setup_entry(
 
     async def _discovered_wemo(coordinator: DeviceCoordinator) -> None:
         """Handle a discovered Wemo device."""
-        async_add_entities(
-            AttributeSensor(coordinator, description)
-            for description in ATTRIBUTE_SENSORS
-            if hasattr(coordinator.wemo, description.key)
-        )
+        if isinstance(coordinator.wemo, CrockPot):
+            async_add_entities(
+                [CrockPotStatus(coordinator), CrockPotCookedTime(coordinator), CrockPotRemainingTime(coordinator)]
+            )
+        else:
+            async_add_entities(
+                AttributeSensor(coordinator, description)
+                for description in ATTRIBUTE_SENSORS
+                if hasattr(coordinator.wemo, description.key)
+            )
 
     await async_wemo_dispatcher_connect(hass, _discovered_wemo)
 
@@ -107,3 +114,65 @@ class AttributeSensor(WemoEntity, SensorEntity):
     def native_value(self) -> StateType:
         """Return the value of the device attribute."""
         return self.convert_state(getattr(self.wemo, self.entity_description.key))
+
+
+class CrockPotSensor(WemoEntity, SensorEntity):
+    """Common base for WeMo CrockPot sensors."""
+
+    @property
+    def name_suffix(self) -> str:
+        """Return the name of the entity if any."""
+        return self.entity_description.name
+
+    @property
+    def unique_id_suffix(self) -> str:
+        """Return the id of this entity."""
+        return self.entity_description.key
+
+
+class CrockPotStatus(CrockPotSensor):
+    """Current CrockPot Status (string)."""
+
+    entity_description = SensorEntityDescription(
+        key="status",
+        name="status",
+        icon="mdi:stove",
+    )
+
+    @property
+    def native_value(self) -> str:
+        """Return string representation of current state."""
+        if self.wemo.remaining_time == 0:
+            return self.wemo.mode_string
+        else:
+            return f"{self.wemo.mode_string}, Remaining {'{:02d}:{:02d}'.format(*divmod(self.wemo.remaining_time, 60))}"
+
+
+class CrockPotCookedTime(CrockPotSensor):
+    """Current CrockPot Cooked Time."""
+
+    entity_description = SensorEntityDescription(
+        key="cookedtime",
+        name="Cooked Time",
+        icon="mdi:clock",
+    )
+
+    @property
+    def native_value(self) -> str:
+        """Return cooked time."""
+        return '{:02d}:{:02d}'.format(*divmod(self.wemo.cooked_time, 60))
+
+
+class CrockPotRemainingTime(CrockPotSensor):
+    """Current CrockPot Remaining Time."""
+
+    entity_description = SensorEntityDescription(
+        key="remainingtime",
+        name="Remaining Time",
+        icon="mdi:clock-outline",
+    )
+
+    @property
+    def native_value(self) -> str:
+        """Return Remaining time."""
+        return '{:02d}:{:02d}'.format(*divmod(self.wemo.remaining_time, 60))

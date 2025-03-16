@@ -106,3 +106,4 @@ async def async_remove_entry(hass: HomeAssistant, entry: TuyaConfigEntry) -> Non
         entry.data[CONF_TOKEN_INFO],
     )
     await hass.async_add_executor_job(manager.unload)
+    

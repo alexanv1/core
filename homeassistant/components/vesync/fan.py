@@ -336,15 +336,16 @@ class VeSyncFanHA(VeSyncBaseEntity[VeSyncFanBase | VeSyncPurifier], FanEntity):
         if preset_mode:
             await self.async_set_preset_mode(preset_mode)
             return
+        
         if percentage is None:
-            success = await self.device.turn_on()
-            if not success:
-                if self.device.last_response:
-                    raise HomeAssistantError(self.device.last_response.message)
-                raise HomeAssistantError("Failed to turn on fan, no response found.")
-            self.async_write_ha_state()
-        else:
-            await self.async_set_percentage(percentage)
+            # If percentage is not specified, turn on to 'auto' mode if available
+            if VS_FAN_MODE_AUTO in self.preset_modes:
+                await self.async_set_preset_mode(VS_FAN_MODE_AUTO)
+                return
+            else:
+                percentage = 50
+
+        await self.async_set_percentage(percentage)
 
     @override
     async def async_turn_off(self, **kwargs: Any) -> None:

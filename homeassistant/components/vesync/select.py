@@ -12,6 +12,7 @@ from homeassistant.components.select import SelectEntity, SelectEntityDescriptio
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from .common import is_humidifier, is_outlet, is_purifier
@@ -25,6 +26,9 @@ from .const import (
     PURIFIER_NIGHT_LIGHT_LEVEL_DIM,
     PURIFIER_NIGHT_LIGHT_LEVEL_OFF,
     PURIFIER_NIGHT_LIGHT_LEVEL_ON,
+    PURIFIER_AUTO_PREFERENCE_DEFAULT,
+    PURIFIER_AUTO_PREFERENCE_EFFICIENT,
+    PURIFIER_AUTO_PREFERENCE_QUIET,
     VS_DEVICES,
     VS_DISCOVERY,
 )
@@ -94,6 +98,7 @@ SELECT_DESCRIPTIONS: list[VeSyncSelectEntityDescription] = [
             device.state.nightlight_brightness,
             HUMIDIFIER_NIGHT_LIGHT_LEVEL_OFF,
         ),
+        entity_category=EntityCategory.CONFIG,
     ),
     # night_light for air purifiers
     VeSyncSelectEntityDescription(
@@ -108,6 +113,7 @@ SELECT_DESCRIPTIONS: list[VeSyncSelectEntityDescription] = [
         exists_fn=lambda device: is_purifier(device) and device.supports_nightlight,
         select_option_fn=_toggle_purifier_nightlight,
         current_option_fn=lambda device: device.state.nightlight_status,
+        entity_category=EntityCategory.CONFIG,
     ),
     # night_light for outlets
     VeSyncSelectEntityDescription(
@@ -122,6 +128,19 @@ SELECT_DESCRIPTIONS: list[VeSyncSelectEntityDescription] = [
         exists_fn=lambda device: is_outlet(device) and device.supports_nightlight,
         select_option_fn=_toggle_outlet_nightlight,
         current_option_fn=lambda device: device.state.nightlight_status,
+    ),
+    # Auto mode preference for air purifiers
+    VeSyncSelectEntityDescription(
+        key="auto_preference_type",
+        options=[
+            PURIFIER_AUTO_PREFERENCE_DEFAULT,
+            PURIFIER_AUTO_PREFERENCE_QUIET,
+            PURIFIER_AUTO_PREFERENCE_EFFICIENT,
+        ],
+        exists_fn=lambda device: is_purifier(device) and device.state.auto_preference_type,
+        select_option_fn=lambda device, value: device.set_auto_preference(value),
+        current_option_fn=lambda device: device.state.auto_preference_type,
+        entity_category=EntityCategory.CONFIG,
     ),
 ]
 

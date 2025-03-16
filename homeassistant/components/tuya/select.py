@@ -133,7 +133,8 @@ SELECTS: dict[DeviceCategory, tuple[SelectEntityDescription, ...]] = {
         SelectEntityDescription(
             key=DPCode.MOODLIGHTING,
             entity_category=EntityCategory.CONFIG,
-            translation_key="humidifier_moodlighting",
+            icon="mdi:lightbulb-multiple",
+            name="Moodlighting",
         ),
         SelectEntityDescription(
             key=DPCode.COUNTDOWN,

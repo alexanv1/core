@@ -39,6 +39,7 @@ from homeassistant.const import (
     UnitOfPower,
     UnitOfRatio,
     UnitOfTime,
+    UnitOfTemperature,
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
@@ -140,19 +141,21 @@ SENSORS: dict[DeviceCategory, tuple[TuyaSensorEntityDescription, ...]] = {
     DeviceCategory.BH: (
         TuyaSensorEntityDescription(
             key=DPCode.TEMP_CURRENT,
-            translation_key="current_temperature",
+            name="Current Temperature",
             device_class=SensorDeviceClass.TEMPERATURE,
             state_class=SensorStateClass.MEASUREMENT,
+            native_unit_of_measurement=UnitOfTemperature.FAHRENHEIT,
         ),
         TuyaSensorEntityDescription(
             key=DPCode.TEMP_CURRENT_F,
-            translation_key="current_temperature",
+            name="Current Temperature",
             device_class=SensorDeviceClass.TEMPERATURE,
             state_class=SensorStateClass.MEASUREMENT,
+            native_unit_of_measurement=UnitOfTemperature.FAHRENHEIT,
         ),
         TuyaSensorEntityDescription(
             key=DPCode.STATUS,
-            translation_key="status",
+            name="Status",
         ),
     ),
     DeviceCategory.CL: (
@@ -727,6 +730,30 @@ SENSORS: dict[DeviceCategory, tuple[TuyaSensorEntityDescription, ...]] = {
             translation_key="air_quality",
         ),
     ),
+    DeviceCategory.KQZG: (
+        TuyaSensorEntityDescription(
+            key=DPCode.TEMP_CURRENT,
+            name="Current Temperature",
+            device_class=SensorDeviceClass.TEMPERATURE,
+            state_class=SensorStateClass.MEASUREMENT,
+            native_unit_of_measurement=UnitOfTemperature.FAHRENHEIT,
+        ),
+        TuyaSensorEntityDescription(
+            key=DPCode.STATUS,
+            name="Status",
+        ),
+        TuyaSensorEntityDescription(
+            key=DPCode.COOKING_HISTORY,
+            name="Cooking History",
+            icon="mdi:history",
+        ),
+        TuyaSensorEntityDescription(
+            key=DPCode.COOK_TIME,
+            name="Remaining Time",
+            native_unit_of_measurement=UnitOfTime.MINUTES,
+            icon="mdi:timer",
+        ),
+    ),
     DeviceCategory.LDCG: (
         TuyaSensorEntityDescription(
             key=DPCode.BRIGHT_STATE,
@@ -786,17 +813,22 @@ SENSORS: dict[DeviceCategory, tuple[TuyaSensorEntityDescription, ...]] = {
     DeviceCategory.MZJ: (
         TuyaSensorEntityDescription(
             key=DPCode.TEMP_CURRENT,
-            translation_key="current_temperature",
+            name="Current Temperature",
             device_class=SensorDeviceClass.TEMPERATURE,
             state_class=SensorStateClass.MEASUREMENT,
         ),
         TuyaSensorEntityDescription(
             key=DPCode.STATUS,
-            translation_key="sous_vide_status",
+            name="Status",
+        ),
+        TuyaSensorEntityDescription(
+            key=DPCode.FAULT,
+            name="Fault",
+            icon="mdi:alert",
         ),
         TuyaSensorEntityDescription(
             key=DPCode.REMAIN_TIME,
-            translation_key="remaining_time",
+            name="Remaining Time",
             native_unit_of_measurement=UnitOfTime.MINUTES,
         ),
     ),
