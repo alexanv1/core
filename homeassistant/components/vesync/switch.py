@@ -101,7 +101,6 @@ SENSOR_DESCRIPTIONS: Final[tuple[VeSyncSwitchEntityDescription, ...]] = (
             lambda device: rgetattr(device, "state.display_set_status") is not None
         ),
         translation_key="display",
-        entity_category=EntityCategory.CONFIG,
         on_fn=lambda device: _toggle_display(device, True),
         off_fn=lambda device: _toggle_display(device, False),
         entity_category=EntityCategory.CONFIG,
@@ -111,7 +110,6 @@ SENSOR_DESCRIPTIONS: Final[tuple[VeSyncSwitchEntityDescription, ...]] = (
         is_on=lambda device: device.state.child_lock,
         exists_fn=(lambda device: rgetattr(device, "state.child_lock") is not None),
         translation_key="child_lock",
-        entity_category=EntityCategory.CONFIG,
         on_fn=lambda device: _toggle_child_lock(device, True),
         off_fn=lambda device: _toggle_child_lock(device, False),
         entity_category=EntityCategory.CONFIG,
@@ -123,7 +121,6 @@ SENSOR_DESCRIPTIONS: Final[tuple[VeSyncSwitchEntityDescription, ...]] = (
             lambda device: rgetattr(device, "state.automatic_stop_config") is not None
         ),
         translation_key="auto_off_config",
-        entity_category=EntityCategory.CONFIG,
         on_fn=lambda device: _toggle_auto_stop(device, True),
         off_fn=lambda device: _toggle_auto_stop(device, False),
         entity_category=EntityCategory.CONFIG,
